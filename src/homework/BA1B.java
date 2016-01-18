@@ -5,14 +5,12 @@
 package homework;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-import edu.princeton.cs.algs4.TST;
+import java.util.Set;
 
 public class BA1B {
 	
@@ -21,18 +19,26 @@ public class BA1B {
 //		String s = args[0];
 //		int l = Integer.valueOf(args[1]);
 		
+//		String s = "CGGAAGCGAGATTCGCGTGGCGTGATTCCGGCGGGCGTGGAGAAGCGAGATTCATTCAAGCCGGGAGGCGTGGCGT"
+//				 + "GGCGTGGCGTGCGGATTCAAGCCGGCGGGCGTGATTCGAGCGGCGGATTCGAGATTCCGGGCGTGCGGGCGTGAAG"
+//				 + "CGCGTGGAGGAGGCGTGGCGTGCGGGAGGAGAAGCGAGAAGCCGGATTCAAGCAAGCATTCCGGCGGGAGATTCGC"
+//				 + "GTGGAGGCGTGGAGGCGTGGAGGCGTGCGGCGGGAGATTCAAGCCGGATTCGCGTGGAGAAGCGAGAAGCGCGTGC"
+//				 + "GGAAGCGAGGAGGAGAAGCATTCGCGTGATTCCGGGAGATTCAAGCATTCGCGTGCGGCGGGAGATTCAAGCGAGG"
+//				 + "AGGCGTGAAGCAAGCAAGCAAGCGCGTGGCGTGCGGCGGGAGAAGCAAGCGCGTGATTCGAGCGGGCGTGCGGAAG"
+//				 + "CGAGCGG";
+//		int l = 12;
 		String s = "ACAACTATGCATCACTATCGGGAACTATCCT";
 		int l = 5;
 		
-		System.out.println(suffixWay(s,l));
-		System.out.println(hashWay(s,l));
-		System.out.println(tstWay(s,l));
+		System.out.println("Suffix:  " + suffixWay(s,l));
+		System.out.println("Hashing: " + hashWay(s,l));
+		System.out.println("TST:     " + tstWay(s,l));
 	}
 
 	private static String hashWay(String s, int l) {
+		long start = System.currentTimeMillis();
 		
 		Map<String, Integer> map = new HashMap<>();
-		
 		String str;
 		int biggest = 0;
 		for(int i = 0; i + l <= s.length(); i++){
@@ -52,7 +58,9 @@ public class BA1B {
 				out.add(st);
 			}
 		}
-	
+		
+		long stop = System.currentTimeMillis();
+		System.out.println("Time: " + (stop - start) + " ms.");
 		return out.toString();
 	}
 	
@@ -60,14 +68,28 @@ public class BA1B {
 
 	private static String tstWay(String s, int l) {
 		
-		TST<Integer> trie = new TST<>();
+		long start = System.currentTimeMillis();
+		CountingTST<Integer> trie = new CountingTST<>();
 		
-		for(int i= 0; i + l <= s.length(); i++){
-			trie.put(s.substring(i, i + l), 0);
+//		Set<String> tmp = new HashSet<>();
+		for(int i = 0; i + l <= s.length(); i++){
+			String t = s.substring(i, i + l);
+			System.out.println(t);
+			trie.put(t, i);
+//			tmp.add(t);
 		}
 		
+		int freq = trie.getMostFrequent();
+		List<String> out = new ArrayList<>();
+		for(String str : trie.keys()){
+			if (freq == trie.getFrequency(str)){
+				out.add(str);
+			}
+		}
 		
-		return null;
+		long stop = System.currentTimeMillis();
+		System.out.println("Time: " + (stop - start) + " ms.");
+		return out.toString();
 	}
 	
 	
@@ -75,7 +97,7 @@ public class BA1B {
 
 	private static String suffixWay(String s, int l) {
 		
-		
+		long start = System.currentTimeMillis();
 		List<String> suffix = new ArrayList<>(s.length() * 2); 
 		for(int i= 0; i + l <= s.length(); i++){
 			suffix.add(s.substring(i, i + l));
@@ -113,18 +135,10 @@ public class BA1B {
 			
 		}
 		
-//		int biggest = 0;
-//		for (Integer i : out.keySet()) {
-//			if (i > biggest) biggest = i;
-//		}
-		
+		long stop = System.currentTimeMillis();
+		System.out.println("Time: " + (stop - start) + " ms.");
 		return out.get(biggest).toString();
 	}
-	
-	
-	
-	
-	
 	
 	static class StringComparator implements Comparator<String> {
 
