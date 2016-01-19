@@ -1,5 +1,8 @@
 package homework;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
@@ -8,19 +11,24 @@ import edu.princeton.cs.algs4.TST;
 public class CountingTST<Value> {
     private int N;              // size
     private Node<Value> root;   // root of TST
-    private int mostFreq = 0;
+    private int mostFreq = 1;	//элемент(ы), встречавшиеся чаще всего. 1 отсеивает случай, когда все элементы уникальны
+    private List<Integer> freqLeaf;
+    private List<String> words;
 
     private static class Node<Value> {
         private char c;                        // character
         private Node<Value> left, mid, right;  // left, middle, and right subtries
         private Value val;                     // value associated with string
         private int count = 0;					//Считает, сколько раз данное слово было добавленно
-    }
+        private boolean isEndLeaf = false;		//указывает, чем является данный узел: родитель с данными
+    }											//или же промежуточный узел
 
     /**
      * Initializes an empty string symbol table.
      */
     public CountingTST() {
+    	this.freqLeaf = new ArrayList<>();
+    	this.words = new ArrayList<>();
     }
 
     /**
@@ -76,8 +84,9 @@ public class CountingTST<Value> {
         else if (d < key.length() - 1) return get(x.mid,   key, d+1);
         else                           return x;
     }
+    
 
-    /**
+	/**
      * Inserts the key-value pair into the symbol table, overwriting the old value
      * with the new value if the key is already in the symbol table.
      * If the value is <tt>null</tt>, this effectively deletes the key from the symbol table.
@@ -102,12 +111,23 @@ public class CountingTST<Value> {
         else if (c > x.c)               x.right = put(x.right, key, val, d);
         else if (d < key.length() - 1)  x.mid   = put(x.mid,   key, val, d+1);
         else{
+        	x.isEndLeaf = true;
         	x.val = val;
         	++x.count;
-        	if (mostFreq < x.count) mostFreq = x.count;
+        	if (mostFreq < x.count) {
+        		mostFreq = x.count;
+        		this.freqLeaf = new ArrayList<>(); //встретив новый наибольший, старые не нужны
+        	}
+        	if (mostFreq == x.count){
+        		this.freqLeaf.add((Integer) x.val);
+        	}
+        	
         }
 
         return x;
+    }
+    public List<Integer> getShiftsOfMostFrequent(){
+    	return this.freqLeaf;
     }
     
     public int getMostFrequent(){
@@ -240,6 +260,8 @@ public class CountingTST<Value> {
         for (String s : st.keysThatMatch(".he.l."))
             StdOut.println(s);
     }
+
+
 }
 /******************************************************************************
  *  Copyright 2002-2015, Robert Sedgewick and Kevin Wayne.

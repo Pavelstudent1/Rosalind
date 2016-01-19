@@ -19,24 +19,52 @@ public class BA1B {
 //		String s = args[0];
 //		int l = Integer.valueOf(args[1]);
 		
-//		String s = "CGGAAGCGAGATTCGCGTGGCGTGATTCCGGCGGGCGTGGAGAAGCGAGATTCATTCAAGCCGGGAGGCGTGGCGT"
-//				 + "GGCGTGGCGTGCGGATTCAAGCCGGCGGGCGTGATTCGAGCGGCGGATTCGAGATTCCGGGCGTGCGGGCGTGAAG"
-//				 + "CGCGTGGAGGAGGCGTGGCGTGCGGGAGGAGAAGCGAGAAGCCGGATTCAAGCAAGCATTCCGGCGGGAGATTCGC"
-//				 + "GTGGAGGCGTGGAGGCGTGGAGGCGTGCGGCGGGAGATTCAAGCCGGATTCGCGTGGAGAAGCGAGAAGCGCGTGC"
-//				 + "GGAAGCGAGGAGGAGAAGCATTCGCGTGATTCCGGGAGATTCAAGCATTCGCGTGCGGCGGGAGATTCAAGCGAGG"
-//				 + "AGGCGTGAAGCAAGCAAGCAAGCGCGTGGCGTGCGGCGGGAGAAGCAAGCGCGTGATTCGAGCGGGCGTGCGGAAG"
-//				 + "CGAGCGG";
-//		int l = 12;
-		String s = "ACAACTATGCATCACTATCGGGAACTATCCT";
-		int l = 5;
+		//answer: [CGGCGGGAGATT, CGGGAGATTCAA, CGTGCGGCGGGA, CGTGGAGGCGTG, CGTGGCGTGCGG, GCGTGCGGCGGG, 
+		//		   GCGTGGAGGCGT, GCGTGGCGTGCG, GGAGAAGCGAGA, GGAGATTCAAGC, GGCGGGAGATTC, GGGAGATTCAAG, 
+		//		   GTGCGGCGGGAG, TGCGGCGGGAGA]
+		String s = "CGGAAGCGAGATTCGCGTGGCGTGATTCCGGCGGGCGTGGAGAAGCGAGATTCATTCAAGCCGGGAGGCGTGGCGT"
+				 + "GGCGTGGCGTGCGGATTCAAGCCGGCGGGCGTGATTCGAGCGGCGGATTCGAGATTCCGGGCGTGCGGGCGTGAAG"
+				 + "CGCGTGGAGGAGGCGTGGCGTGCGGGAGGAGAAGCGAGAAGCCGGATTCAAGCAAGCATTCCGGCGGGAGATTCGC"
+				 + "GTGGAGGCGTGGAGGCGTGGAGGCGTGCGGCGGGAGATTCAAGCCGGATTCGCGTGGAGAAGCGAGAAGCGCGTGC"
+				 + "GGAAGCGAGGAGGAGAAGCATTCGCGTGATTCCGGGAGATTCAAGCATTCGCGTGCGGCGGGAGATTCAAGCGAGG"
+				 + "AGGCGTGAAGCAAGCAAGCAAGCGCGTGGCGTGCGGCGGGAGAAGCAAGCGCGTGATTCGAGCGGGCGTGCGGAAG"
+				 + "CGAGCGG";
+		int l = 12;
+//		String s = "ACAACTATGCATCACTATCGGGAACTATCCT";
+//		int l = 5;
 		
 		System.out.println("Suffix:  " + suffixWay(s,l));
 		System.out.println("Hashing: " + hashWay(s,l));
 		System.out.println("TST:     " + tstWay(s,l));
+		System.out.println("NewTST:  " + newTSTWay(s, l));
+	}
+
+	private static String newTSTWay(String s, int l) {
+		long start = System.nanoTime();
+		
+		CountingTSTv2 trie = new CountingTSTv2(s, l);
+		for(int i = 0; i <= s.length() - l; i++){
+//			System.out.println(s.substring(i, i + l));
+			trie.put(i);
+		}
+		
+		List<String> out = new ArrayList<>();
+		for(Integer i : trie.getMostFreq()){
+			out.add(s.substring(i, i + l));
+		}
+//		for(Integer i : trie.findMostFreq()){
+//			out.add(s.substring(i, i + l));
+//		}
+		
+		
+		long stop = System.nanoTime();
+		System.out.println("Time: " + (double)(stop - start)/1000000 + " ms.");		
+		
+		return out.toString();
 	}
 
 	private static String hashWay(String s, int l) {
-		long start = System.currentTimeMillis();
+		long start = System.nanoTime();
 		
 		Map<String, Integer> map = new HashMap<>();
 		String str;
@@ -59,8 +87,8 @@ public class BA1B {
 			}
 		}
 		
-		long stop = System.currentTimeMillis();
-		System.out.println("Time: " + (stop - start) + " ms.");
+		long stop = System.nanoTime();
+		System.out.println("Time: " + (double)(stop - start)/1000000 + " ms.");
 		return out.toString();
 	}
 	
@@ -68,27 +96,39 @@ public class BA1B {
 
 	private static String tstWay(String s, int l) {
 		
-		long start = System.currentTimeMillis();
+		long start = System.nanoTime();
 		CountingTST<Integer> trie = new CountingTST<>();
 		
 //		Set<String> tmp = new HashSet<>();
 		for(int i = 0; i + l <= s.length(); i++){
 			String t = s.substring(i, i + l);
-			System.out.println(t);
+//			System.out.println((i + 1) + ": " + t);
 			trie.put(t, i);
 //			tmp.add(t);
 		}
+//		System.out.println(trie.size());
+//		for (Integer i : trie.getShiftsOfMostFrequent()) {
+//			for (int j = i, c = 0; c < l; c++, j++) {
+//				System.out.print(s.charAt(j));
+//			}
+//			System.out.println();
+//		}
 		
-		int freq = trie.getMostFrequent();
+//		int freq = trie.getMostFrequent();
+//		List<String> out = new ArrayList<>();
+//		for(String str : trie.keys()){
+//			if (freq == trie.getFrequency(str)){
+//				out.add(str);
+//			}
+//		}
+		
 		List<String> out = new ArrayList<>();
-		for(String str : trie.keys()){
-			if (freq == trie.getFrequency(str)){
-				out.add(str);
-			}
+		for(Integer i : trie.getShiftsOfMostFrequent()){
+			out.add(s.substring(i, i + l));
 		}
 		
-		long stop = System.currentTimeMillis();
-		System.out.println("Time: " + (stop - start) + " ms.");
+		long stop = System.nanoTime();
+		System.out.println("Time: " + (double)(stop - start)/1000000 + " ms.");
 		return out.toString();
 	}
 	
@@ -97,7 +137,7 @@ public class BA1B {
 
 	private static String suffixWay(String s, int l) {
 		
-		long start = System.currentTimeMillis();
+		long start = System.nanoTime();
 		List<String> suffix = new ArrayList<>(s.length() * 2); 
 		for(int i= 0; i + l <= s.length(); i++){
 			suffix.add(s.substring(i, i + l));
@@ -135,8 +175,8 @@ public class BA1B {
 			
 		}
 		
-		long stop = System.currentTimeMillis();
-		System.out.println("Time: " + (stop - start) + " ms.");
+		long stop = System.nanoTime();
+		System.out.println("Time: " + (double)(stop - start)/1000000 + " ms.");
 		return out.get(biggest).toString();
 	}
 	
