@@ -3,6 +3,8 @@
  */
 package homework;
 
+import java.util.Arrays;
+
 public class BA2D {
 	
 	public static void main(String[] args) {
@@ -19,28 +21,62 @@ public class BA2D {
 
 	private static String greedyMotifSearch(String[] s, int k, int t) {
 		
+		String[] motifs = new String[t];
 		double[][] profile = new double[4][k];
+		int curScore, bestScore;
 		String[] bestMotifs = new String[t];
 		for (int i = 0; i < bestMotifs.length; i++) {
 			bestMotifs[i] = s[i].substring(0, k);
 		}
+		bestScore = calcScore(bestMotifs);
 		
+		for (int i = 0; i + k <= s[0].length(); i++) {
+			motifs[0] = s[0].substring(i, i + k);
+			System.out.println("Current" + i + " motif from 0 String = " + s[0] + ": " + motifs[0]);
 			
-		String[] motifs = new String[t];
-		motifs[0] = s[0].substring(0, 0 + k);
+			for (int j = 1; j < t; j++) {
+				profile = createProfileMatrix(motifs, k, t);
+				String motif = findMostProbableMotif(s[j], k, profile);
+				System.out.println(j + ": String = " + s[j] + " -> MostProbableMotif: " + motif);
+				motifs[j] = motif;	
+			}
+			
+			curScore = calcScore(motifs);
+			if (curScore < bestScore){
+				bestMotifs = motifs;
+				bestScore = curScore;
+			}
+			motifs = new String[t];
+		}
 		
-		for (int i = 1; i + k <= s[0].length(); i++) {
-			
-			profile = createProfileMatrix(motifs, k, t);
-			String motif = findMostProbableMotif(s[i], k, profile);
-			System.out.println(i + ": String = " + s[i] + " -> MostProbableMotif: " + motif);
-			motifs[i] = motif;
-			
+		return Arrays.asList(bestMotifs).toString();
+	}
+
+	private static int calcScore(String[] motifs) {
+
+		int A = 0, C = 0, G = 0, T = 0, sum = 0, result = 0;
+		for (int i = 0; i < motifs[i].length(); i++) {
+			for (int j = 0; j < motifs.length; j++) {
+				char c = motifs[j].charAt(i);
+				switch (c) {
+				case 'A': ++A; break;
+				case 'C': ++C; break;
+				case 'G': ++G; break;
+				case 'T': ++T; break;
+				}
+			}
+			int adding = (((A == C ? 0 : A) == G ? 0 : A) == T ? 0 : A);
+			int greater = Math.max(Math.max(Math.max(A, C), G), T);
+			sum += (A != greater ? A : 0);
+			sum += (C != greater ? C : 0);
+			sum += (G != greater ? G : 0);
+			sum += (T != greater ? T : 0);
+			result += sum;
+			A = C = G = T = sum = 0;
 		}
 		
 		
-
-		return null;
+		return result;
 	}
 
 	private static String findMostProbableMotif(String str, int k, double[][] profile) {
