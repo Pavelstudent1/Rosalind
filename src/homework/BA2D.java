@@ -3,23 +3,43 @@
  */
 package homework;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class BA2D {
 	
 	public static void main(String[] args) {
 		
-		int k = 3, t = 5;
-		String[] s = new String[] {
-				"GGCGTTCAGGCA", "AAGAATCAGTCA", 
-				"CAAGGAGTTCGC", "CACGTCAATCAC", "CAATAATATTCG"};
+		File file = new File(System.getProperty("user.dir") + "/files/greedy_motif_search_small.txt");
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(file);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
 		
+		String in;
+		scanner.next();
+		int k = Integer.valueOf(scanner.next()),
+			t = Integer.valueOf(scanner.next()),
+			count = 0;
+		String[] s = new String[t];
+		while(count < t){
+			in = scanner.next();
+			s[count] = in;
+			++count;
+		}
 		
-		System.out.println(greedyMotifSearch(s, k, t));
-		
+		String[] output = greedyMotifSearch(s, k, t);
+		System.out.println("=========================================\nOutput:");
+		for (String out : output) {
+			System.out.println(out);
+		}
 	}
 
-	private static String greedyMotifSearch(String[] s, int k, int t) {
+	private static String[] greedyMotifSearch(String[] s, int k, int t) {
 		
 		String[] motifs = new String[t];
 		double[][] profile = new double[4][k];
@@ -32,7 +52,7 @@ public class BA2D {
 		
 		for (int i = 0; i + k <= s[0].length(); i++) {
 			motifs[0] = s[0].substring(i, i + k);
-			System.out.println("Current" + i + " motif from 0 String = " + s[0] + ": " + motifs[0]);
+			System.out.println(i + " k-mer from 0 String = " + s[0] + ": " + motifs[0]);
 			
 			for (int j = 1; j < t; j++) {
 				profile = createProfileMatrix(motifs, k, t);
@@ -42,14 +62,14 @@ public class BA2D {
 			}
 			
 			curScore = calcScore(motifs);
-			if (curScore < bestScore){
+			if (curScore < bestScore){ //возможно нужно <=
 				bestMotifs = motifs;
 				bestScore = curScore;
 			}
 			motifs = new String[t];
 		}
 		
-		return Arrays.asList(bestMotifs).toString();
+		return bestMotifs;
 	}
 
 	private static int calcScore(String[] motifs) {
@@ -65,12 +85,21 @@ public class BA2D {
 				case 'T': ++T; break;
 				}
 			}
-			int adding = (((A == C ? 0 : A) == G ? 0 : A) == T ? 0 : A);
 			int greater = Math.max(Math.max(Math.max(A, C), G), T);
-			sum += (A != greater ? A : 0);
-			sum += (C != greater ? C : 0);
-			sum += (G != greater ? G : 0);
-			sum += (T != greater ? T : 0);
+			int multyGreater = 0;
+			if (A != greater) sum += A;
+				else multyGreater++;
+			if (C != greater) sum += C;
+				else multyGreater++;
+			if (G != greater) sum += G;
+				else multyGreater++;
+			if (T != greater) sum += T;
+				else multyGreater++;
+//			sum += (A != greater ? A : 0);
+//			sum += (C != greater ? C : 0);
+//			sum += (G != greater ? G : 0);
+//			sum += (T != greater ? T : 0);
+			if (multyGreater > 1) result += greater;
 			result += sum;
 			A = C = G = T = sum = 0;
 		}
@@ -86,7 +115,6 @@ public class BA2D {
 		
 		int shift = 0;
 		for (int i = 0; i + k <= str.length(); i++) {
-			
 			double p = calcProbability(i, str, k, profile);
 			if (p > max){
 				max = p;
@@ -94,20 +122,20 @@ public class BA2D {
 			}
 		}
 		
+		//если все вероятности p будут нулевыми, то вернётся shift = 0, т.е. первый k-мер
 		return str.substring(shift, shift + k);
 	}
 
 	private static double calcProbability(int shift, String str, int k, double[][] profile) {
 		
-		double p = 0;	
+		double p = 1;	
 		for (int i = shift, col = 0; i < k + shift; i++, col++) {
 			char c = str.charAt(i);
-			
 			switch (c) {
-				case 'A': p += profile[0][col]; break;
-				case 'C': p += profile[1][col]; break;
-				case 'G': p += profile[2][col]; break;
-				case 'T': p += profile[3][col]; break;
+				case 'A': p *= profile[0][col]; break;
+				case 'C': p *= profile[1][col]; break;
+				case 'G': p *= profile[2][col]; break;
+				case 'T': p *= profile[3][col]; break;
 			}
 		}
 		
