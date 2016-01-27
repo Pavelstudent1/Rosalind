@@ -1,5 +1,6 @@
+
 /**
- * Implement GreedyMotifSearch
+ * Implement GreedyMotifSearch with Pseudocounts
  */
 package homework;
 
@@ -7,11 +8,11 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
 
-public class BA2D {
+public class BA2E {
 	
 	public static void main(String[] args) {
 		
-		File file = new File(System.getProperty("user.dir") + "/files/ba2d_big.txt");
+		File file = new File(System.getProperty("user.dir") + "/files/ba2e_big.txt");
 		Scanner scanner = null;
 		try {
 			scanner = new Scanner(file);
@@ -54,7 +55,7 @@ public class BA2D {
 			System.out.println(i + " k-mer from 0 String = " + s[0] + ": " + motifs[0]);
 			
 			for (int j = 1; j < t; j++) {
-				profile = createProfileMatrix(motifs, k, t);
+				profile = createProfileMatrixByLaplace(motifs, k, t, j);
 				String motif = findMostProbableMotif(s[j], k, profile);
 				System.out.println(j + ": String = " + s[j] + " -> MostProbableMotif: " + motif);
 				motifs[j] = motif;	
@@ -137,30 +138,6 @@ public class BA2D {
 		return p;
 	}
 	
-	//вероятно оптимизация: т.к построение профайла суть добавление данных из добавляемых
-	//в motifs строк, то можно не пересчитывать всё заново, а передавать массив обратно
-	//в функцию с номером строки, данные из которой нужно добавить
-	private static double[][] createProfileMatrix(String[] motifs, int k, int t) {
-		double[][] profile = new double[4][k];
-		
-		//A:0, C:1, G:2, T:3
-		for (int i = 0; i < k; i++) {
-			for (int j = 0; j < motifs.length; j++) {
-				if (motifs[j] == null) break;
-				char c = motifs[j].charAt(i);
-				switch(c){
-				case 'A': profile[0][i] += 0.1; break;
-				case 'C': profile[1][i] += 0.1; break;
-				case 'G': profile[2][i] += 0.1; break;
-				case 'T': profile[3][i] += 0.1; break;
-				}
-				
-			}
-		}
-		
-		return profile;
-	}
-	
 	private static double[][] createProfileMatrixByLaplace(String[] motifs, int k, int t, int nkmers) {
 
 		double[][] profile = new double[4][k];
@@ -191,3 +168,4 @@ public class BA2D {
 
 	
 }
+
