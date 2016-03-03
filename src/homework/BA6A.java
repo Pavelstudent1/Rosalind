@@ -16,30 +16,7 @@ public class BA6A {
 	public static void main(String[] args) {
 		
 		File file = new File(System.getProperty("user.dir") + "/files/ba6a_big.txt");
-		Scanner scanner = null;
-		try {
-			scanner = new Scanner(file);
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		}
-		
-		scanner.nextLine();
-		StringBuilder sb;
-		List<Integer> readInput = new ArrayList<>();
-		boolean readNext = true;
-		while(scanner.hasNext() && readNext){
-			sb = new StringBuilder(scanner.next());
-			if (sb.charAt(0) == '('){
-				sb.deleteCharAt(0);
-			}
-			if (sb.charAt(sb.length() -1) == ')'){
-				sb.deleteCharAt(sb.length() - 1);
-				readNext = false;
-			}
-			readInput.add(Integer.valueOf(sb.toString()));
-		}
-		
-		int[] input = convertListToArray(readInput);
+		int[] input = loadInputData(file);
 		
 		//int[] input = new int[] {-3, 4, 1, 5, -2};
 		
@@ -48,19 +25,72 @@ public class BA6A {
 		
 	}
 
-	private static int[] convertListToArray(List<Integer> list) {
-		int[] output = new int[list.size()];
+	private static int[] loadInputData(File file) {
 		
-		int index = 0;
-		for (int i : list) {
-			output[index++] = i;
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(file);
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		}
+		scanner.nextLine();
+		
+		String data = scanner.nextLine();
+		data = data.replaceAll("\\(|\\)", "");
+		String[] values = data.split(" ");
+		int[] output = new int[values.length];
+		for (int i = 0; i < values.length; i++) {
+			output[i] = Integer.valueOf(values[i]);
 		}
 		
+		scanner.close();
 		return output;
 	}
 
-	private static void printSteps(List<int[]> steps) {
+	private static List<int[]> greedySorting(final int[] input) {
+		
+		List<int[]> steps = new ArrayList<>();
+		
+		for (int pos = 0, required = 1; pos < input.length; pos++, required++) {
+			
+			//find position of required number
+			int start = pos, end = pos;
+			for (; end < input.length; end++) {
+				if (input[end] == required || input[end] == -required) break;
+			}
+			reverseSubString(input, start, end);
+			saveStep(input, steps, pos);
+		}
+		
+		return steps;
+	}
 
+	private static void reverseSubString(int[] seq, int start, int end) {
+		if (start == end) {
+			seq[start] = -seq[start];
+			return;
+		}
+		
+		int tmp = 0;
+		for (; start <= end; start++, end--) {
+			tmp = seq[start];
+			seq[start] = -seq[end];
+			seq[end] = -tmp;
+		}
+	}
+	
+	private static void saveStep(int[] input, List<int[]> steps, int curPos) {
+		steps.add(Arrays.copyOf(input, input.length));
+		
+		//value in correct position, but additional inversion are needed?
+		if (input[curPos] < 0){
+			input[curPos] = -input[curPos];
+			steps.add(Arrays.copyOf(input, input.length));
+		}
+	}
+
+	private static void printSteps(List<int[]> steps) {
+		
 		for (int[] step : steps) {
 			System.out.print("(");
 			for (int i : step) {
@@ -70,50 +100,6 @@ public class BA6A {
 		}
 		System.out.println("Moves overall: " + steps.size());
 	}
-
-	private static List<int[]> greedySorting(final int[] input) {
-		//create copy of input data
-		int[] seq = new int[input.length];
-		System.arraycopy(input, 0, seq, 0, input.length);
-		
-		List<int[]> steps = new ArrayList<>();
-		
-		for (int i = 0, sample = 1; i < seq.length; i++, sample++) {
-			
-			//find needed value...
-			int start = i, end = i;
-			for (; end < seq.length; end++) {
-				if (seq[end] == sample || seq[end] == -sample) break;
-			}
-			flipSequence(seq, start, end);
-			
-			steps.add(Arrays.copyOf(seq, seq.length));
-			
-			if (seq[i] < 0){
-				seq[i] = -seq[i];
-				steps.add(Arrays.copyOf(seq, seq.length));
-			}
-		}
-		
-		return steps;
-	}
-
-	private static void flipSequence(int[] seq, int start, int end) {
-		if (start == end) {
-			seq[start] = -seq[start];
-			return;
-		}
-		
-		int tmp = 0, flip_limit = (end - start) / 2;
-		for (int flips = 0; flips <= flip_limit; flips++, start++, end--) {
-			tmp = seq[start];
-			seq[start] = -seq[end];
-			seq[end] = -tmp;
-		}
-		
-		if (start == end) {
-			seq[start] = -seq[start];
-		}
-		
-	}
+	
 }
+
