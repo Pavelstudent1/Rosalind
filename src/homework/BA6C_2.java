@@ -142,23 +142,6 @@ public class BA6C_2 {
 		}
 	}
 
-	private static void findSpecialsCycles(Map<Integer, List<Integer>> graph) {
-
-		for (Map.Entry<Integer, List<Integer>> e : graph.entrySet()) {
-			List<Integer> value = e.getValue();
-			boolean isEqual = true;
-			for (int i = 0; i < value.size(); i++) {
-				if (value.get(i) == value.get(i + 1)){}
-			}
-		}
-		
-	}
-
-	private static void findCycle(Integer v, Map<Integer, List<Integer>> g, Map<Integer, List<Boolean>> path, int remainTryings) {
-		
-		
-	}
-
 	private static AdjGraph circularToGraph(List<List<Integer>> g) {
 		
 		AdjGraph ag = new AdjGraph(g);
