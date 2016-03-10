@@ -18,7 +18,7 @@ public class BA6C {
 		file = new File(System.getProperty("user.dir") + "/files/ba6c_big.txt");
 		List<int[][]> in34 = loadData(file);
 		
-		int[][] in1 = new int[][] {{1, 2, 3, 4, 5, 6}};
+		int[][] in1 = new int[][] {{1, -2, -3, -6, 4, 5}};
 		int[][] in2 = new int[][] {{1, -3, -6, -5}, {2, -4}};
 		
 		int[][] geneAsInts1 = convertGeneToInts(in1);
