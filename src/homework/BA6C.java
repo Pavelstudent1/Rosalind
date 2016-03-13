@@ -13,109 +13,96 @@ public class BA6C {
 	public static void main(String[] args) {
 		
 		File file = new File(System.getProperty("user.dir") + "/files/ba6c_small.txt");
-		List<int[][]> in12 = loadData(file);
+		List<int[][]> input1 = loadData(file);
 		
 		file = new File(System.getProperty("user.dir") + "/files/ba6c_big.txt");
-		List<int[][]> in34 = loadData(file);
+		List<int[][]> input2 = loadData(file);
 		
-		int[][] in1 = new int[][] {{1, -2, -3, -6, 4, 5}};
-		int[][] in2 = new int[][] {{1, -3, -6, -5}, {2, -4}};
+		int[][] geneAsInts1 = convertGeneToInts(input1.get(0));
+		int[][] geneAsInts2 = convertGeneToInts(input1.get(1));
 		
-		int[][] geneAsInts1 = convertGeneToInts(in1);
-		int[][] geneAsInts2 = convertGeneToInts(in2);
+		Graph graphP = createUndirectedGraph(geneAsInts1);
+		Graph graphQ = createUndirectedGraph(geneAsInts2);
 		
-		int[][] geneAsInts3 = convertGeneToInts(in34.get(0));
-		int[][] geneAsInts4 = convertGeneToInts(in34.get(1));
-		
-		Graph g1 = createUndirectedGraph(geneAsInts1);
-		Graph g2 = createUndirectedGraph(geneAsInts2);
-		
-		Graph g3 = createUndirectedGraph(geneAsInts3);
-		Graph g4 = createUndirectedGraph(geneAsInts4);
-		
-		List<Stack<Integer>> cycles1 = findCycles(g1, g2);
-		int numberOfCycles1 = cycles1.size() / 2;
-		int twoBreakDistance1 = g1.E() - numberOfCycles1;
-		System.out.println("2-break distance = " + twoBreakDistance1);
-		
-		List<Stack<Integer>> cycles2 = findCycles(g3, g4);
-		int numberOfCycles2 = cycles2.size() / 2;
-		int twoBreakDistance2 = g3.E() - numberOfCycles2;
-		System.out.println("2-break distance = " + twoBreakDistance2);
+		int numberOfCycles = findNumberOfCycles(graphP, graphQ);
+		int twoBreakDistance = graphP.E() - numberOfCycles;
+		System.out.println("2-break distance between P and Q is " + twoBreakDistance);
 	}
-
-	private static List<Stack<Integer>> findCycles(Graph g1, Graph g2) {
-
-		boolean marked1[] = new boolean[g1.V()];
-		boolean marked2[] = new boolean[g2.V()];
-		
-		List<Stack<Integer>> ways = new ArrayList<>();
-		Stack<Integer> way = new Stack<>();
-			
-			boolean flip = false;
-			for (int i = 1; i != g1.V(); i++) {
-				if (marked1[i]){
-//					System.out.println("Pass i=" + i); 
-					continue;
-				}else{
-					marked1[i] = true;
-				}
-				way.push(i);
-				int find = g1.adj(i).iterator().next();
-				while(i != find){
-					if (flip){
-						marked1[find] = true;
-					}else{
-						marked2[find] = true;
-					}
-					way.push(find);
-					find = (flip ? g1.adj(find).iterator().next() : g2.adj(find).iterator().next());
-					flip = !flip;
-				}
-
-				ways.add(way);
-				way = new Stack<>();
-				flip = false;
-			}
-			
-		
-		
-		return ways;
-	}
-
+	
+	//Convert "+1" into pair "tail->head" and then to (1,2), where t = 2*x - 1, h = 2*x
+	//If "-1" then pair will be (2,1)
 	private static int[][] convertGeneToInts(int[][] in) {
-		int[][] seq = new int[in.length][];
+		int[][] intSeq = new int[in.length][];
 		
-		for (int i = 0; i < in.length; i++) {
+		for (int gene = 0; gene < in.length; gene++) {
 			
-			seq[i] = new int[in[i].length * 2];
-			for (int j = 0, k = 0; j < in[i].length; j++, k += 2) {
-				int direction = in[i][j];
-				seq[i][k] = (direction > 0 ? 2 * Math.abs(direction) - 1 : 2 * Math.abs(direction));
-				seq[i][k + 1] = (direction > 0 ? 2 * Math.abs(direction) : 2 * Math.abs(direction) - 1);
+			intSeq[gene] = new int[in[gene].length * 2];
+			for (int element = 0, pos = 0; element < in[gene].length; element++, pos += 2) {
+				int direction = in[gene][element];
+				intSeq[gene][pos] = (direction > 0 ? 2 * Math.abs(direction) - 1 : 2 * Math.abs(direction));
+				intSeq[gene][pos + 1] = (direction > 0 ? 2 * Math.abs(direction) : 2 * Math.abs(direction) - 1);
 			}
 		}
 		
-		return seq;
+		return intSeq;
 	}
 
 	private static Graph createUndirectedGraph(int[][] genes) {
 		
-		int vertices = calcVertices(genes);
-		Graph graph = new Graph(vertices + 1);
+		int vertices = requiredNumberOfVertices(genes);
+		Graph graph = new Graph(vertices + 1); //fill from vertices 1
 		
 		for (int[] gen : genes) {
 			int i = 1;
 			for (; i < gen.length - 1; i += 2) {
 				graph.addEdge(gen[i], gen[i + 1]);
 			}
-			graph.addEdge(gen[i], gen[0]);
+			graph.addEdge(gen[i], gen[0]); //special case: bounding elements
 		}
 		
 		return graph;
 	}
+	
+	private static int findNumberOfCycles(Graph g1, Graph g2) {
 
-	private static int calcVertices(int[][] in) {
+		boolean marked1[] = new boolean[g1.V()];
+		boolean marked2[] = new boolean[g2.V()];
+		
+		List<Stack<Integer>> listOfCycles = new ArrayList<>();
+		Stack<Integer> cycle = new Stack<>();
+			
+			boolean flip = false;
+			for (int toFind = 1; toFind != g1.V(); toFind++) {
+				if (marked1[toFind]){
+					continue;
+				}else{
+					marked1[toFind] = true;
+				}
+				cycle.push(toFind);
+				int nextVertex = g1.adj(toFind).iterator().next();
+				while(toFind != nextVertex){
+					if (flip){
+						marked1[nextVertex] = true;
+					}else{
+						marked2[nextVertex] = true;
+					}
+					cycle.push(nextVertex);
+					nextVertex = (flip ? g1.adj(nextVertex).iterator().next() : g2.adj(nextVertex).iterator().next());
+					flip = !flip;
+				}
+
+				listOfCycles.add(cycle);
+				cycle = new Stack<>();
+				flip = false;
+			}
+			
+		return listOfCycles.size() / 2;
+	}
+
+
+
+
+	private static int requiredNumberOfVertices(int[][] in) {
 		
 		int sum = 0;
 		for (int[] gen : in) {
@@ -142,16 +129,16 @@ public class BA6C {
 			for (int i = 0; i < genes.length; i++) {
 				genes[i] = genes[i].replaceAll("\\(|\\)", "");
 			}
-			int[][] out = new int[genes.length][];
+			int[][] intGene = new int[genes.length][];
 			for (int i = 0; i < genes.length; i++) {
 				String[] str = genes[i].split(" ");
-				out[i] = new int[str.length];
-				for (int j = 0; j < out[i].length; j++) {
-					out[i][j] = Integer.valueOf(str[j]);
+				intGene[i] = new int[str.length];
+				for (int j = 0; j < intGene[i].length; j++) {
+					intGene[i][j] = Integer.valueOf(str[j]);
 				}
 			}
 			
-			list.add(out);
+			list.add(intGene);
 		}
 		
 		scan.close();
