@@ -71,7 +71,7 @@ public class BA6C {
 		List<Stack<Integer>> listOfCycles = new ArrayList<>();
 		Stack<Integer> cycle = new Stack<>();
 			
-			boolean flip = false;
+			boolean changeGraph = false;
 			for (int toFind = 1; toFind != g1.V(); toFind++) {
 				if (marked1[toFind]){
 					continue;
@@ -81,22 +81,20 @@ public class BA6C {
 				cycle.push(toFind);
 				int nextVertex = g1.adj(toFind).iterator().next();
 				while(toFind != nextVertex){
-					if (flip){
-						marked1[nextVertex] = true;
-					}else{
-						marked2[nextVertex] = true;
-					}
+					marked1[nextVertex] = marked2[nextVertex] = true; //prevent doubling of cycles
 					cycle.push(nextVertex);
-					nextVertex = (flip ? g1.adj(nextVertex).iterator().next() : g2.adj(nextVertex).iterator().next());
-					flip = !flip;
+					changeGraph = !changeGraph;
+					nextVertex = (changeGraph ? 
+							g2.adj(nextVertex).iterator().next() :
+							g1.adj(nextVertex).iterator().next()); 
 				}
 
 				listOfCycles.add(cycle);
 				cycle = new Stack<>();
-				flip = false;
+				changeGraph = false;
 			}
 			
-		return listOfCycles.size() / 2;
+		return listOfCycles.size();
 	}
 
 
