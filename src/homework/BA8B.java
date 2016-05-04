@@ -43,11 +43,7 @@ public class BA8B {
 		double min = Double.MAX_VALUE;
 		
 		for (float[] center : centers) {
-			double value = 0.0;
-			for (int i = 0; i < center.length; i++) {
-				value += Math.pow((point[i] - center[i]), 2);
-			}
-			value = Math.sqrt(value);
+			double value = calcEuclidianDistance(point, center);
 			
 			if (value < min){
 				min = value;
@@ -55,6 +51,17 @@ public class BA8B {
 		}
 		
 		return min;
+	}
+
+	private static double calcEuclidianDistance(float[] point, float[] center) {
+		double value = 0.0;
+		
+		for (int i = 0; i < center.length; i++) {
+			value += Math.pow((point[i] - center[i]), 2);
+		}
+		value = Math.sqrt(value);
+		
+		return value;
 	}
 	
 	private static Data loadData(File file) {
