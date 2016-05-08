@@ -3,11 +3,17 @@ package homework;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.DoubleFunction;
+import java.util.function.Function;
+import java.util.stream.DoubleStream;
+import java.util.stream.Stream;
 
-public class BA8B {
-	
+public class BA8B_J8 {
+
 	private static class Data {
 		int k;
 		int m;
@@ -17,52 +23,47 @@ public class BA8B {
 	
 	public static void main(String[] args) {
 		
-		File file = new File(System.getProperty("user.dir") + "/files/ba8b_big.txt");
+		File file = new File(System.getProperty("user.dir") + "/files/ba8b_small.txt");
 		Data data = loadData(file);
 		
 		double dis = distortion(data);
 		System.out.println(String.format("%.3f", dis));
 	}
+	
+	private static double distortion(Data data) {
 
-	public static double distortion(Data data) {
-		
 		double result = 0.0;
 		
-		for (float[] point : data.points) {
-			double d = minDistance(point, data.centers);
-			result += Math.pow(d, 2);
-		}
+		calcEuclidianDistanceStream(
+				new double[] {5,5}, 
+				new double[] {0,1});
+		data.points
+			.stream()
+			.forEach(p -> System.out.println(p));
 		
-		result *= (1.0 / data.points.size());
 		
-		return result;
+		
+		
+		return 0;
 	}
 	
-	public static double minDistance(float[] point, List<float[]> centers) {
-		double min = Double.MAX_VALUE;
-		
-		for (float[] center : centers) {
-			double value = calcEuclidianDistance(point, center);
-			
-			if (value < min){
-				min = value;
-			}
-		}
-		
-		return min;
-	}
-
-	public static double calcEuclidianDistance(float[] point, float[] center) {
+	
+	public static double calcEuclidianDistanceStream(double[] point, double[] center){
 		double value = 0.0;
 		
-		for (int i = 0; i < center.length; i++) {
-			value += Math.pow((point[i] - center[i]), 2);
-		}
-		value = Math.sqrt(value);
 		
 		return value;
 	}
 	
+	
+	
+	
+	
+	
+	
+	
+	
+
 	private static Data loadData(File file) {
 		Data data = new Data();
 		
@@ -84,7 +85,6 @@ public class BA8B {
 		data.points = new ArrayList<>();
 		fillFloats(data.m, data.points, scan);
 		
-		scan.close();
 		return data;
 	}
 
