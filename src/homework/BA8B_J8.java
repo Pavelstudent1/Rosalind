@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Consumer;
 import java.util.function.DoubleFunction;
 import java.util.function.Function;
 import java.util.stream.DoubleStream;
@@ -17,8 +18,8 @@ public class BA8B_J8 {
 	private static class Data {
 		int k;
 		int m;
-		List<float[]> centers;
-		List<float[]> points;
+		List<Point> points;
+		List<Point> centers;
 	}
 	
 	public static void main(String[] args) {
@@ -35,8 +36,8 @@ public class BA8B_J8 {
 		double result = 0.0;
 		
 		calcEuclidianDistanceStream(
-				new double[] {5,5}, 
-				new double[] {0,1});
+				data.points.get(0), 
+				data.centers.get(0));
 		data.points
 			.stream()
 			.forEach(p -> System.out.println(p));
@@ -48,9 +49,12 @@ public class BA8B_J8 {
 	}
 	
 	
-	public static double calcEuclidianDistanceStream(double[] point, double[] center){
+	public static double calcEuclidianDistanceStream(Point p, Point p2){
 		double value = 0.0;
 		
+		DoubleStream d = Arrays.stream(p.coord);
+		DoubleStream d2 = Arrays.stream(p2.coord);
+//		.forEach(d -> d + Arrays.stream(p2));
 		
 		return value;
 	}
@@ -66,37 +70,82 @@ public class BA8B_J8 {
 
 	private static Data loadData(File file) {
 		Data data = new Data();
-		
+
 		Scanner scan = null;
 		try {
 			scan = new Scanner(file);
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
+
 		scan.nextLine();
 		String[] km = scan.nextLine().split(" ");
 		data.k = Integer.valueOf(km[0]);
 		data.m = Integer.valueOf(km[1]);
 		
 		data.centers = new ArrayList<>();
-		fillFloats(data.k, data.centers, scan);
+		while(!scan.hasNext("[\\--]+")){
+			String[] line = scan.nextLine().split(" ");
+			double[] f = new double[data.m];
+			for (int i = 0; i < data.m; i++) {
+				f[i] = Float.valueOf(line[i]);
+			}
+			data.centers.add(new Point(f));
+		}
 		
+		scan.nextLine();
 		data.points = new ArrayList<>();
-		fillFloats(data.m, data.points, scan);
-		
+		while (!scan.hasNext("\\s|Output")) {
+			String[] line = scan.nextLine().split(" ");
+			double[] f = new double[data.m];
+			for (int i = 0; i < data.m; i++) {
+				f[i] = Float.valueOf(line[i]);
+			}
+			data.points.add(new Point(f));
+		}
+
+		scan.close();
 		return data;
 	}
+	
+	private static class Point {
+		double[] coord;
 
-	private static void fillFloats(int dimention, List<float[]> data, Scanner scan) {
-		
-		while(!scan.hasNext("--*|Output")){
-			float[] point = new float[dimention];
-			for (int i = 0; i < point.length; i++) {
-				point[i] = Float.valueOf(scan.next());
-			}
-			data.add(point);
+		public Point(double[] coord) {
+			this.coord = coord;
 		}
-		scan.next();
+
+		public Point(Point p) {
+			this.coord = p.coord;
+		}
+		
+		public Point(int demention){
+			this.coord = new double[demention];
+		}
+
+		@Override
+		public int hashCode() {
+			return (int) ((coord[0] + coord[coord.length - 1]) * 1000);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj == null) return false;
+			if (obj == this) return false;
+
+			double[] other = ((Point) obj).coord;
+			for (int i = 0; i < other.length; i++) {
+				if (!String.format("%.3f", coord[i]).equals(String.format("%.3f", other[i]))) {
+					return false;
+				}
+			}
+
+			return true;
+		}
+
+		@Override
+		public String toString() {
+			return Arrays.toString(this.coord);
+		}
 	}
 }
