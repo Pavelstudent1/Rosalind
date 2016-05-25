@@ -159,6 +159,26 @@ public class CountingTST<Value> {
         }
         return query.substring(0, length);
     }
+    
+    public boolean optim_longestPrefixOf(String query, int startIndex) {
+        if (query == null || query.length() <= startIndex) 
+        	throw new IllegalArgumentException("String is null or startIndex bigger than length of string");
+        int length = 0;
+        Node<Value> x = root;
+        int i = startIndex;
+        while (x != null && i < query.length()) {
+            char c = query.charAt(i);
+            if      (c < x.c) x = x.left;
+            else if (c > x.c) x = x.right;
+            else {
+                i++;
+                if (x.val != null) length = i;
+                x = x.mid;
+            }
+        }
+        
+        return length > 0;
+    }
 
     /**
      * Returns all keys in the symbol table as an <tt>Iterable</tt>.
@@ -263,27 +283,4 @@ public class CountingTST<Value> {
 
 
 }
-/******************************************************************************
- *  Copyright 2002-2015, Robert Sedgewick and Kevin Wayne.
- *
- *  This file is part of algs4.jar, which accompanies the textbook
- *
- *      Algorithms, 4th edition by Robert Sedgewick and Kevin Wayne,
- *      Addison-Wesley Professional, 2011, ISBN 0-321-57351-X.
- *      http://algs4.cs.princeton.edu
- *
- *
- *  algs4.jar is free software: you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation, either version 3 of the License, or
- *  (at your option) any later version.
- *
- *  algs4.jar is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with algs4.jar.  If not, see http://www.gnu.org/licenses.
- ******************************************************************************/
 
